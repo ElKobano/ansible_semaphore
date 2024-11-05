@@ -1,0 +1,59 @@
+---
+- name: "Ensure group semaphore exists"
+  group:
+    name: "semaphore"
+    state: present
+
+- name: "Create a user semaphore"
+  user:
+    name: "semaphore"
+    group: "semaphore"
+
+- name: "Install semaphore from url"
+  apt:
+    deb: "{{ semaphore_binary_url }}"
+
+- name: "Create semaphore config dir"
+  file:
+    path: "/etc/semaphore"
+    state: directory
+    mode: "0755"
+
+- name: "Copy env file for semaphore"
+  template:
+    src: "env.j2"
+    dest: "/etc/semaphore/env"
+    mode: "0644"
+
+- name: "Copy conf file for semaphore"
+  template:
+    src: "semaphore.conf.j2"
+    dest: "/etc/semaphore/config.json"
+    mode: "0644"
+
+- name: "Create systemd.sevice unit"
+  copy:
+    src: "semaphore.service"
+    dest: "/etc/systemd/system/{{ semaphore_server_service_name }}.service"
+    mode: "0644"
+
+- name: "Enable semaphoreUI service and start it"
+  service:
+    name: "{{ semaphore_server_service_name }}.service"
+    daemon_reload: true
+    enabled: true
+    state: started
+
+- name: "Get semaphore users list"
+  shell:
+    cmd: "semaphore user list"
+  register: semaphore_users_list
+  retries: 5
+  delay: 5
+  until: semaphore_users_list.rc == 0
+  changed_when: False
+
+- name: "Create semaphore user if not exist"
+  shell:
+    cmd: "semaphore user add --admin --login {{ semaphore_user }} --name={{ semaphore_user }} --email={{ semaphore_user_email }} --password={{ semaphore_pass }}"
+  when: 'semaphore_user not in semaphore_users_list.stdout_lines'

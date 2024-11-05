@@ -1,0 +1,20 @@
+---
+pg_host: localhost
+pg_user: semaphore
+pg_pass: S0meV3ryH@rDP@5s
+pg_db_name: semaphore
+pg_apt_packets:
+  - postgresql
+  - python3-psycopg2
+  - libpq-dev
+
+semaphore_binary_url: 'https://github.com/semaphoreui/semaphore/releases/download/v2.10.35/semaphore_2.10.35_linux_amd64.deb'
+registration_token: "o4nvMNAsORI5uKUX1G2XH0QRxjFKouRd+UsHIbOVNdg="
+semaphore_port: 8080
+semaphore_user: admin
+semaphore_pass: V3ryH@rdp@S5
+semaphore_user_email: test@test.test
+runner_config_path: /etc/semaphore/runner_config.json
+server_config_path: /etc/semaphore/config.json
+semaphore_runner_service_name: semaphore_runner
+semaphore_server_service_name: semaphore

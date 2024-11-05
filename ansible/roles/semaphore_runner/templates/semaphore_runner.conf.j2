@@ -1,0 +1,9 @@
+{
+  "tmp_path": "/tmp/semaphore",
+  "web_host": "http://{{ hostvars[ 'semaphore_server' ].ansible_host }}:{{ semaphore_port }}",
+  "runner": {
+     "token_file": "/tmp/semaphore_runner_token",
+     "max_parallel_tasks": 8,
+     "webhook":  "http://{{hostvars[ 'semaphore_server' ].ansible_host }}:{{ semaphore_port }}/runner{{ ansible_host }}"
+  }
+}

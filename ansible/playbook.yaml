@@ -1,0 +1,21 @@
+---
+- name: "Install semaphore on node"
+  hosts: semaphore_server
+  become: true
+  vars:
+    ansible_ssh_pipelining: true
+  roles:
+    - postgres
+    - semaphore
+
+  pre_tasks:
+    - name: "Install pip packages"
+      apt:
+        pkg: python3-pip
+        state: present
+
+- name: "Install semaphore runner on node"
+  hosts: semaphore_runners
+  become: true
+  roles:
+    - semaphore_runner

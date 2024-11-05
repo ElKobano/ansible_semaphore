@@ -1,0 +1,14 @@
+all:
+  hosts:
+    semaphore_server:
+      ansible_host: 192.168.56.5
+      ansible_user: vagrant
+      ansible_password: vagrant
+    semaphore_runner:
+      ansible_host: 192.168.56.4
+      ansible_user: vagrant
+      ansible_password: vagrant
+
+semaphore_runners:
+  hosts:
+    semaphore_runner:

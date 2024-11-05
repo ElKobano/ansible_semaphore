@@ -1,0 +1,55 @@
+---
+- name: "Ensure group semaphore exists"
+  group:
+    name: "semaphore"
+    state: present
+
+- name: "Create a user semaphore"
+  user:
+    name: "semaphore"
+    group: "semaphore"
+
+- name: "Install semaphore from url"
+  apt:
+    deb: "{{ semaphore_binary_url }}"
+
+- name: "Create semaphore config dir"
+  file:
+    path: "/etc/semaphore"
+    state: directory
+    mode: "0755"
+
+- name: "Copy env file for semaphore"
+  template:
+    src: "env.j2"
+    dest: "/etc/semaphore/env"
+    mode: "0644"
+
+- name: "Copy conf file for semaphore"
+  template:
+    src: "semaphore_runner.conf.j2"
+    dest: "/etc/semaphore/runner_config.json"
+    mode: "0644"
+
+- name: "Create systemd.sevice unit"
+  copy:
+    src: "runner.service"
+    dest: "/etc/systemd/system/{{ semaphore_runner_service_name }}.service"
+    mode: "0644"
+
+- name: "Get Semaphore Runner Service Status"
+  ansible.builtin.systemd:
+    name: "{{ semaphore_runner_service_name }}"
+  register: runner_service_status
+
+- name: "Register semaphore runner on server"
+  shell:
+    cmd: 'export SEMAPHORE_CONFIG={{ runner_config_path }} && export && SEMAPHORE_RUNNER_REGISTRATION_TOKEN="{{ registration_token }}" semaphore runner register --config ${SEMAPHORE_CONFIG}'
+  when: runner_service_status.status.ActiveState == "inactive"
+
+- name: "Enable semaphoreUI service and start it"
+  service:
+    name: "{{ semaphore_runner_service_name }}.service"
+    daemon_reload: true
+    enabled: true
+    state: started

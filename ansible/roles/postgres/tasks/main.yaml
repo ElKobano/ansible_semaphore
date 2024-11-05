@@ -1,0 +1,48 @@
+---
+- name: "Install apt packages"
+  apt:
+    pkg: "{{ pg_apt_packets }}"
+    state: present
+
+- name: "Start and enable services"
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
+
+- name: "Create app database"
+  postgresql_db:
+    state: present
+    name: "{{ pg_db_name }}"
+  become: yes
+  become_user: postgres
+
+- name: "Create db user"
+  postgresql_user:
+    state: present
+    name: "{{ pg_user }}"
+    password: "{{ pg_pass }}"
+  become: yes
+  become_user: postgres
+
+- name: "Grant db user access to app db"
+  postgresql_privs:
+    type: database
+    database: "{{ pg_db_name }}"
+    roles: "{{ pg_user }}"
+    grant_option: no
+    privs: all
+  become: yes
+  become_user: postgres
+
+- name: "Allow md5 connection for the db user"
+  postgresql_pg_hba:
+    dest: "/etc/postgresql/14/main/pg_hba.conf"
+    contype: host
+    databases: all
+    method: md5
+    users: "{{ pg_user }}"
+    create: true
+  become: yes
+  become_user: postgres
+  notify: restart postgresql
